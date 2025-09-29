@@ -17,8 +17,8 @@ fn main() {
         if check_legal.is_empty() {
             let opp_legal = legal_moves(&val, opp, player);
             if opp_legal.is_empty() {
+                println!("{opp} player has no valid move.");
                 let (b, w) = count_dics(&val);
-                println!("Game Over! Black: {b}, White: {w}");
                 match b.cmp(&w) {
                     std::cmp::Ordering::Greater => println!("Black wins by {} points!", b - w),
                     std::cmp::Ordering::Equal => println!("Draw!"),
@@ -26,13 +26,13 @@ fn main() {
                 }
                 break;
             } else {
-                println!("{} player has no valid move", player);
+                println!("{} player has no valid move.", player);
                 turn ^= 1;
                 continue;
             }
         }
 
-        println!("Enter move for colour {}: ", player);
+        println!("Enter move for colour {} (RowCol): ", player);
         let mut user_input = String::new();
         if io::stdin().read_line(&mut user_input).is_err() {
             println!("Invalid move. Try again");
@@ -48,6 +48,8 @@ fn main() {
                 continue;
             }
         };
+        // Search for a vector where the map x and y meet x and y of the move
+        // Clone used for independent ownership
         if let Some(flips) = check_legal.iter().find_map(|(xx, yy, flips)| {
             if *xx == x && *yy == y {
                 Some(flips.clone())
@@ -64,6 +66,7 @@ fn main() {
 }
 
 fn init_board() -> [[char; N]; N] {
+    //starting values for the game
     let mut grid = [['.'; N]; N];
     grid[3][3] = 'W';
     grid[3][4] = 'B';
@@ -72,6 +75,7 @@ fn init_board() -> [[char; N]; N] {
     grid
 }
 
+//converting the processed array to output string format
 fn calc_board(board: &[[char; N]; N]) -> String {
     let mut s = String::new();
     s.push_str("  abcdefgh\n");
@@ -86,6 +90,7 @@ fn calc_board(board: &[[char; N]; N]) -> String {
     s
 }
 
+//pasing the x and y values of the board
 fn parse_move(s: &str) -> Option<(usize, usize)> {
     let mut it = s.chars();
     let x = it.next()?;
@@ -98,6 +103,7 @@ fn parse_move(s: &str) -> Option<(usize, usize)> {
     Some((x, y))
 }
 
+//converting row and column labels to int index
 fn letter_to_index(ch: char) -> Option<usize> {
     let cl = ch.to_ascii_lowercase();
     if ('a'..='h').contains(&cl) {
@@ -107,6 +113,7 @@ fn letter_to_index(ch: char) -> Option<usize> {
     }
 }
 
+//apply the move by appending the player value for the values which are to be flipped and selected value
 fn apply_move(
     board: &mut [[char; N]; N],
     player: char,
@@ -120,6 +127,7 @@ fn apply_move(
     }
 }
 
+// Returns a vector of legal moves associated with a certain move
 fn legal_moves(
     board: &[[char; N]; N],
     player: char,
@@ -141,6 +149,7 @@ fn legal_moves(
     result
 }
 
+//Main logic function for checking directions and associated with the point and returning legal moves avaliable
 fn flipping(
     board: &[[char; N]; N],
     player: char,
@@ -159,7 +168,7 @@ fn flipping(
         (0, 1),
         (1, -1),
         (1, 0),
-        (1, 1), //potential issue
+        (1, 1),
     ];
 
     let mut all_flips = Vec::new();
@@ -188,10 +197,12 @@ fn flipping(
     Some(all_flips)
 }
 
+//Checks to ensure that x and y are within bounds
 fn bound_check(x: isize, y: isize) -> bool {
     x >= 0 && x < N as isize && y >= 0 && y < N as isize
 }
 
+//Counting function to count the number of dics in the end
 fn count_dics(board: &[[char; N]; N]) -> (usize, usize) {
     let mut b = 0;
     let mut w = 0;
